@@ -1,5 +1,5 @@
 # ProductsTestASP_App
-Create a web application with the following functionality:
+## Create a web application with the following functionality:
 <ul>
 <li>
   1. A products list:  
@@ -34,7 +34,8 @@ Create a web application with the following functionality:
    </ul>
    </li>
    </ul>
-Technical requirements:
+   
+## Technical requirements:
 <ul>
 <li>
 1. UI. You can use any JS framework for UI implementation. Or not use it at all and implement UI with MVC Razor. No requirements for UI design
