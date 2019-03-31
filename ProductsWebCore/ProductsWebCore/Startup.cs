@@ -1,28 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProductsWebCore.Data;
-using SimpleInjector;
-using SimpleInjector.Integration.AspNetCore.Mvc;
-using SimpleInjector.Lifestyles;
 
 namespace ProductsWebCore
 {
     public class Startup
-    {
-        private Container _container = new Container();
-
+    {        
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -45,30 +34,12 @@ namespace ProductsWebCore
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            IntegrateSimpleInjector(services);
-
             return services.BuildServiceProvider();
-        }
-
-        private void IntegrateSimpleInjector(IServiceCollection services)
-        {
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
-
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
-            services.AddSingleton<IControllerActivator>(
-                new SimpleInjectorControllerActivator(_container));
-            services.AddSingleton<IViewComponentActivator>(
-                new SimpleInjectorViewComponentActivator(_container));
-
-            services.EnableSimpleInjectorCrossWiring(_container);
-            services.UseSimpleInjectorAspNetRequestScoping(_container);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-        {
-            InitializeContainer(app);
+        {            
 
             if (env.IsDevelopment())
             {
@@ -89,21 +60,8 @@ namespace ProductsWebCore
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Product}/{action=Index}/{id?}");
+                    template: "{controller=Products}/{action=Index}/{id?}");
             });
-        }
-
-        private void InitializeContainer(IApplicationBuilder app)
-        {
-            // Add application presentation components:
-            _container.RegisterMvcControllers(app);
-            _container.RegisterMvcViewComponents(app);
-
-            //storages
-            //_container.Register<ITestStorage, TestStorage>(Lifestyle.Singleton);
-
-            // Allow Simple Injector to resolve services from ASP.NET Core.
-            _container.AutoCrossWireAspNetComponents(app);
         }
     }
 }
