@@ -1,9 +1,6 @@
 ﻿using ProductTestWork.Data.Entities;
 using ProductTestWork.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using X.PagedList;
 
 namespace ProductTestWork.ViewModels
@@ -12,11 +9,11 @@ namespace ProductTestWork.ViewModels
     {
         string CurrentSort { get; set; }
 
-        string IdSortParm { get; set; }
+        string IdSortParm { get; }
 
-        string NameSortParm { get; set; }
+        string NameSortParm { get; }
 
-        string CategorySortParm { get; set; }
+        string CategorySortParm { get; }
 
         string CurrentFilter { get; set; }
 
@@ -29,5 +26,9 @@ namespace ProductTestWork.ViewModels
         IPagedList<ProductModel> ProductPagedList { get; }
 
         void SetProductsFromDb(List<Product> entities);
+
+        void SortProductList(string sort);
+
+        void FilterProductList(string filterString);
     }
 }

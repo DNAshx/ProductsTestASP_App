@@ -4,7 +4,6 @@ using ProductTestWork.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using X.PagedList;
 
 namespace ProductTestWork.ViewModels
@@ -22,11 +21,29 @@ namespace ProductTestWork.ViewModels
 
         public string CurrentSort { get; set; }
 
-        public string IdSortParm { get; set; } = ID_SORT;
+        public string IdSortParm
+        {
+            get
+            {
+                return CurrentSort == ID_SORT ? ID_SORT_DESC : ID_SORT;
+            }
+        }
 
-        public string NameSortParm { get; set; } = NAME_SORT;
+        public string NameSortParm
+        {
+            get
+            {
+                return CurrentSort == NAME_SORT ? NAME_SORT_DESC : NAME_SORT;
+            }
+        }
 
-        public string CategorySortParm { get; set; } = CATEGORY_SORT;
+        public string CategorySortParm
+        {
+            get
+            {
+                return CurrentSort == CATEGORY_SORT ? CATEGORY_SORT_DESC : CATEGORY_SORT;
+            }
+        }
 
         public string CurrentFilter { get; set; }
 
@@ -48,7 +65,7 @@ namespace ProductTestWork.ViewModels
         {
             ProductList = new List<ProductModel>();
 
-            _productRepository = productRepository;            
+            _productRepository = productRepository;          
         }
 
         public void SetProductsFromDb(List<Product> entities)
@@ -62,6 +79,46 @@ namespace ProductTestWork.ViewModels
         {
             if (entity != null)
                 ProductList.Add(Map(entity));
+        }
+
+        public void FilterProductList(string filterString)
+        {
+            CurrentFilter = filterString;
+            if (!String.IsNullOrEmpty(CurrentFilter))
+            {
+                ProductList = ProductList
+                    .Where(s => s.ProductName.Contains(CurrentFilter))
+                    .ToList();
+            }
+        }
+
+        public void SortProductList(string sort = ID_SORT)
+        {
+            CurrentSort = sort;
+            switch (CurrentSort)
+            {
+                case ID_SORT:
+                    ProductList = ProductList.OrderBy(p => p.ProductId).ToList();
+                    break;
+                case ID_SORT_DESC:
+                    ProductList = ProductList.OrderByDescending(p => p.ProductId).ToList();
+                    break;
+                case NAME_SORT:
+                    ProductList = ProductList.OrderBy(p => p.ProductName).ToList();
+                    break;
+                case NAME_SORT_DESC:
+                    ProductList = ProductList.OrderByDescending(p => p.ProductName).ToList();
+                    break;
+                case CATEGORY_SORT:
+                    ProductList = ProductList.OrderBy(p => p.CategoryType).ToList();
+                    break;
+                case CATEGORY_SORT_DESC:
+                    ProductList = ProductList.OrderByDescending(p => p.CategoryType).ToList();
+                    break;
+                default:  // Name ascending 
+                    ProductList = ProductList.OrderBy(p => p.ProductId).ToList();
+                    break;
+            }
         }
 
         private ProductModel Map(Product entity)

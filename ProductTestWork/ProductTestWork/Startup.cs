@@ -31,10 +31,10 @@ namespace ProductTestWork
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddDbContext<ProductContext>(options =>
+            services.AddDbContext<ProductContext>(options =>            
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.Add(new ServiceDescriptor(typeof(IProductRepository), typeof(ProductRepository), ServiceLifetime.Singleton));
+            services.Add(new ServiceDescriptor(typeof(IProductRepository), typeof(ProductRepository), ServiceLifetime.Scoped));
             services.Add(new ServiceDescriptor(typeof(IAllProductsViewModel), typeof(AllProductsViewModel), ServiceLifetime.Transient));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);

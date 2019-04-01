@@ -5,9 +5,6 @@ namespace ProductTestWork.Data
 {
     public class ProductContext : DbContext
     {
-        public ProductContext()
-        {}
-
         public ProductContext(DbContextOptions<ProductContext> options) : base(options)
         { }
 

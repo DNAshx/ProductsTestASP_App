@@ -1,13 +1,8 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ProductTestWork.Data;
 using ProductTestWork.Data.Entities;
-using System;
-using X.PagedList;
-using ProductTestWork.Models;
 using ProductTestWork.Data.Repositories;
 using ProductTestWork.ViewModels;
 
@@ -27,14 +22,7 @@ namespace ProductTestWork.Controllers
 
         // GET: Products
         public ViewResult Index(string sortOrder, string currentFilter, string searchString, int? page)
-        {
-            int pageSize = 3;
-
-            _productViewModel.CurrentSort = sortOrder;            
-            _productViewModel.IdSortParm = sortOrder == "ProductId"  ? "ProductId_desc" : "ProductId";
-            _productViewModel.NameSortParm = sortOrder == "ProductName" ? "ProductName_desc" : "ProductName";
-            _productViewModel.CategorySortParm = sortOrder == "ProductCategory" ? "ProductCategory_desc" : "ProductCategory";
-
+        {                        
             //switch to first page if search for product
             if (searchString != null)
             {
@@ -42,47 +30,17 @@ namespace ProductTestWork.Controllers
             }
             else
             {
-                searchString = currentFilter;
-            }
-
-            _productViewModel.CurrentFilter = searchString;
+                searchString = _productViewModel.CurrentFilter;
+            }            
 
             int pageNumber = (page ?? 1);
 
-            _productViewModel.SetProductsFromDb(_productRepository.GetProductsByPage(pageSize, pageNumber));
+            _productViewModel.SetProductsFromDb(_productRepository.GetAllProducts());
 
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                _productViewModel.ProductList = _productViewModel.ProductList
-                    .Where(s => s.ProductName.Contains(searchString))
-                    .ToList();
-            }
+            _productViewModel.FilterProductList(searchString);
 
-            switch (sortOrder)
-            {
-                case "ProductId":
-                    _productViewModel.ProductList = _productViewModel.ProductList.OrderBy(p => p.ProductId).ToList();
-                    break;
-                case "ProductId_desc":
-                    _productViewModel.ProductList = _productViewModel.ProductList.OrderByDescending(p => p.ProductId).ToList();
-                    break;
-                case "ProductName":
-                    _productViewModel.ProductList = _productViewModel.ProductList.OrderBy(p => p.ProductName).ToList();
-                    break;
-                case "ProductName_desc":
-                    _productViewModel.ProductList = _productViewModel.ProductList.OrderByDescending(p => p.ProductName).ToList();
-                    break;
-                case "ProductCategory":
-                    _productViewModel.ProductList = _productViewModel.ProductList.OrderBy(p => p.CategoryType).ToList();
-                    break;
-                case "ProductCategory_desc":
-                    _productViewModel.ProductList = _productViewModel.ProductList.OrderByDescending(p => p.CategoryType).ToList();
-                    break;
-                default:  // Name ascending 
-                    _productViewModel.ProductList = _productViewModel.ProductList.OrderBy(p => p.ProductId).ToList();
-                    break;
-            }
-            
+            _productViewModel.SortProductList(sortOrder);
+
             return View(_productViewModel);            
         }
 
