@@ -8,7 +8,7 @@ namespace ProductTestWork.Data.Repositories
 {
     public interface IProductRepository
     {
-        List<Product> GetAllProducts();
+        IQueryable<Product> GetAllProducts();
 
         Task<List<Product>> GetAllProductsAsync();
 
@@ -16,7 +16,9 @@ namespace ProductTestWork.Data.Repositories
 
         Task<Product> GetProductByIdAsync(int productId);
 
-        List<Product> GetProductsByPage(int pageSize, int pageNumber);
+        Task<int> GetPagesNumberAsync(int pageSize);
+
+        Task<List<Product>> GetProductsByPageAsync(int pageSize, int pageNumber);
 
         List<ProductCategory> GetAllProductCategories();
 

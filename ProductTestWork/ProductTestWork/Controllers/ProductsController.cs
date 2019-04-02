@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProductTestWork.Data.Entities;
 using ProductTestWork.Data.Repositories;
@@ -10,19 +9,16 @@ namespace ProductTestWork.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly IProductRepository _productRepository;
-        private IAllProductsViewModel _productViewModel;        
+        private readonly IProductRepository _productRepository;        
 
-        public ProductsController(IProductRepository productRepository,
-            IAllProductsViewModel productViewModel)
+        public ProductsController(IProductRepository productRepository)
         {
-            _productRepository = productRepository;
-            _productViewModel = productViewModel;
+            _productRepository = productRepository;            
         }
 
         // GET: Products
         public ViewResult Index(string sortOrder, string currentFilter, string searchString, int? page)
-        {                        
+        {            
             //switch to first page if search for product
             if (searchString != null)
             {
@@ -30,42 +26,38 @@ namespace ProductTestWork.Controllers
             }
             else
             {
-                searchString = _productViewModel.CurrentFilter;
+                searchString = currentFilter;
             }            
 
             int pageNumber = (page ?? 1);
 
-            _productViewModel.SetProductsFromDb(_productRepository.GetAllProducts());
+            var productViewModel = new AllProductsViewModel(_productRepository, searchString, sortOrder, pageNumber);
 
-            _productViewModel.FilterProductList(searchString);
-
-            _productViewModel.SortProductList(sortOrder);
-
-            return View(_productViewModel);            
+            return View(productViewModel);
         }
 
         // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _productRepository.GetProductByIdAsync(id ?? 0);
-            if (product == null)
+            var productVM = new ProductViewModel(_productRepository, id);
+            if (productVM.CurrentProduct == null)
             {
                 return NotFound();
             }
 
-            return View(product);
+            return View(productVM);
         }
 
         // GET: Products/Create
         public IActionResult Create()
         {
-            ViewData["CategoryType"] = new SelectList(_productRepository.GetAllProductCategories(), "Id", "CategoryType");
-            return View();
+            var productVM = new ProductViewModel(_productRepository);
+            return View(productVM);
         }
 
         // POST: Products/Create
@@ -73,32 +65,32 @@ namespace ProductTestWork.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductId,ProductName,CategoryId")] Product product)
+        public async Task<IActionResult> Create([Bind(Prefix = "CurrentProduct")] Product product)
         {
             if (ModelState.IsValid)
             {
                 await _productRepository.SaveProductAsync(product);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryType"] = new SelectList(_productRepository.GetAllProductCategories(), "Id", "CategoryType", product.CategoryId);
-            return View(product);
+            
+            return View(new ProductViewModel(_productRepository));
         }
 
         // GET: Products/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
-
-            var product = await _productRepository.GetProductByIdAsync(id ?? 0);
-            if (product == null)
+            var productVM = new ProductViewModel(_productRepository, id);
+            
+            if (productVM.CurrentProduct == null)
             {
                 return NotFound();
             }
-            ViewData["CategoryType"] = new SelectList(_productRepository.GetAllProductCategories(), "Id", "CategoryType", product.CategoryId);
-            return View(product);
+            
+            return View(productVM);
         }
 
         // POST: Products/Edit/5
@@ -106,7 +98,7 @@ namespace ProductTestWork.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,ProductName,CategoryId")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind(Prefix = "CurrentProduct")] Product product)
         {
             if (id != product.ProductId)
             {
@@ -132,25 +124,26 @@ namespace ProductTestWork.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryType"] = new SelectList(_productRepository.GetAllProductCategories(), "Id", "CategoryType", product.CategoryId);
-            return View(product);
+            
+            return View(new ProductViewModel(_productRepository, id));
         }
 
         // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _productRepository.GetProductByIdAsync(id ?? 0);
-            if (product == null)
+            var productVM = new ProductViewModel(_productRepository, id);
+            
+            if (productVM.CurrentProduct == null)
             {
                 return NotFound();
             }
 
-            return View(product);
+            return View(productVM);
         }
 
         // POST: Products/Delete/5

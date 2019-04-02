@@ -1,7 +1,5 @@
-﻿using ProductTestWork.Data.Entities;
-using ProductTestWork.Models;
+﻿using ProductTestWork.Models;
 using System.Collections.Generic;
-using X.PagedList;
 
 namespace ProductTestWork.ViewModels
 {
@@ -22,13 +20,5 @@ namespace ProductTestWork.ViewModels
         int PageNumber { get; set; }
 
         List<ProductModel> ProductList { get; set; }
-
-        IPagedList<ProductModel> ProductPagedList { get; }
-
-        void SetProductsFromDb(List<Product> entities);
-
-        void SortProductList(string sort);
-
-        void FilterProductList(string filterString);
     }
 }

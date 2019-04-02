@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ProductTestWork.Data;
 using ProductTestWork.Data.Entities;
 using System;
 using System.Collections.Generic;
@@ -17,14 +16,14 @@ namespace ProductTestWork.Data.Repositories
             _productContext = productContext;
         }
 
-        public List<Product> GetAllProducts()
+        public IQueryable<Product> GetAllProducts()
         {
-            return _productContext.Products.Include(p => p.ProductCategory).ToList();            
+            return _productContext.Products.Include(p => p.ProductCategory);
         }
 
         public async Task<List<Product>> GetAllProductsAsync()
         {
-            return await _productContext.Products.Include(p => p.ProductCategory).ToListAsync();            
+            return await _productContext.Products.Include(p => p.ProductCategory).ToListAsync();
         }
 
         public Product GetProductById(int productId)
@@ -39,13 +38,19 @@ namespace ProductTestWork.Data.Repositories
                     .FirstOrDefaultAsync(p => p.ProductId == productId);
         }
 
-        public List<Product> GetProductsByPage(int pageSize, int pageNumber)
+        public async Task<int> GetPagesNumberAsync(int pageSize)
         {
-            return _productContext.Products
+            var pageCountTmp = (double)await _productContext.Products.CountAsync() / pageSize;
+            return  (int)Math.Ceiling(pageCountTmp);
+        }
+
+        public async Task<List<Product>> GetProductsByPageAsync(int pageSize, int pageNumber)
+        {            
+            return await _productContext.Products
                     .Include(p => p.ProductCategory)
                     .Skip(pageSize * (pageNumber - 1))
-                    .Take(pageNumber)
-                    .ToList();
+                    .Take(pageSize)
+                    .ToListAsync();
         }
 
         public List<ProductCategory> GetAllProductCategories()

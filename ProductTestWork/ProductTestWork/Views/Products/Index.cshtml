@@ -1,6 +1,4 @@
 ﻿@model ProductTestWork.ViewModels.AllProductsViewModel
-@using X.PagedList.Mvc.Core;
-<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
 
 @{
     ViewData["Title"] = "Products";
@@ -23,7 +21,7 @@
 <table class="table">
     <thead>
         <tr>
-            <th>                
+            <th>
                 @Html.ActionLink("Product Id", "Index", new { sortOrder = Model.IdSortParm, currentFilter = Model.CurrentFilter })
             </th>
             <th>
@@ -58,7 +56,15 @@
     </tbody>
 </table>
 <br />
-Page @(Model.ProductPagedList.PageCount < Model.ProductPagedList.PageNumber ? 0 : Model.ProductPagedList.PageNumber) of @Model.ProductPagedList.PageCount
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
 
-@Html.PagedListPager(Model.ProductPagedList, page => Url.Action("Index",
-    new { page, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter }))
+<div>
+    <ul class="pagination">
+        @for (var i = 1; i <= Model.PageCount; i++)
+        {
+        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+            <a href="@Url.Action("Index", new { page = i, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter })" class="page-link">@i</a>
+        </li>
+        }
+    </ul>
+</div>

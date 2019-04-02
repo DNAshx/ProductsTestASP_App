@@ -1,4 +1,4 @@
-﻿    @model ProductTestWork.Data.Entities.Product
+﻿    @model ProductViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -12,16 +12,16 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="ProductId" />
+            <input type="hidden" asp-for="CurrentProduct.ProductId" />
             <div class="form-group">
-                <label asp-for="ProductName" class="control-label"></label>
-                <input asp-for="ProductName" class="form-control" />
-                <span asp-validation-for="ProductName" class="text-danger"></span>
+                <label asp-for="CurrentProduct.ProductName" class="control-label"></label>
+                <input asp-for="CurrentProduct.ProductName" class="form-control" />
+                <span asp-validation-for="CurrentProduct.ProductName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="CategoryId" class="control-label"></label>
-                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryType"></select>
-                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                <label asp-for="CurrentProduct.CategoryId" class="control-label"></label>
+                <select asp-for="CurrentProduct.CategoryId" class="form-control" asp-items="Model.Categories"></select>
+                <span asp-validation-for="CurrentProduct.CategoryId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

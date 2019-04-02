@@ -4,7 +4,6 @@ using ProductTestWork.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using X.PagedList;
 
 namespace ProductTestWork.ViewModels
 {
@@ -51,27 +50,35 @@ namespace ProductTestWork.ViewModels
 
         public int PageNumber { get; set; } = 1;
 
+        public int PageCount { get; set; }
+
         public List<ProductModel> ProductList { get; set; }
 
-        public IPagedList<ProductModel> ProductPagedList
-        {
-            get
-            {
-                return ProductList.ToPagedList();
-            }
-        }
-
-        public AllProductsViewModel(IProductRepository productRepository)
+        public AllProductsViewModel(IProductRepository productRepository,
+            string searchString, string sortOrder, int pageNumber)
         {
             ProductList = new List<ProductModel>();
 
-            _productRepository = productRepository;          
+            _productRepository = productRepository;
+
+            CurrentFilter = searchString;
+            CurrentSort = sortOrder;
+            PageNumber = pageNumber;
+
+            SetProductsFromDb();
         }
 
-        public void SetProductsFromDb(List<Product> entities)
-        {
+        private void SetProductsFromDb()
+        {            
+            var entities = _productRepository.GetAllProducts();
+
+            entities = FilterProductList(entities);
+            entities = SortProductList(entities);
+            PageCount = CalculatePageCount(entities);
+            entities = GetPageItems(entities);
+
             var resultList = new List<ProductModel>();
-            entities.ForEach(p => resultList.Add(Map(p)));
+            entities.ToList().ForEach(p => resultList.Add(Map(p)));
             ProductList = resultList;
         }
 
@@ -81,44 +88,46 @@ namespace ProductTestWork.ViewModels
                 ProductList.Add(Map(entity));
         }
 
-        public void FilterProductList(string filterString)
-        {
-            CurrentFilter = filterString;
+        private IQueryable<Product> FilterProductList(IQueryable<Product> products)
+        {            
             if (!String.IsNullOrEmpty(CurrentFilter))
             {
-                ProductList = ProductList
-                    .Where(s => s.ProductName.Contains(CurrentFilter))
-                    .ToList();
+                return products.Where(s => s.ProductName.Contains(CurrentFilter));
             }
+
+            return products;
         }
 
-        public void SortProductList(string sort = ID_SORT)
-        {
-            CurrentSort = sort;
+        private IQueryable<Product> SortProductList(IQueryable<Product> products)
+        {            
             switch (CurrentSort)
             {
                 case ID_SORT:
-                    ProductList = ProductList.OrderBy(p => p.ProductId).ToList();
-                    break;
+                    return products.OrderBy(p => p.ProductId);                    
                 case ID_SORT_DESC:
-                    ProductList = ProductList.OrderByDescending(p => p.ProductId).ToList();
-                    break;
+                    return products.OrderByDescending(p => p.ProductId);                    
                 case NAME_SORT:
-                    ProductList = ProductList.OrderBy(p => p.ProductName).ToList();
-                    break;
+                    return products.OrderBy(p => p.ProductName);                    
                 case NAME_SORT_DESC:
-                    ProductList = ProductList.OrderByDescending(p => p.ProductName).ToList();
-                    break;
+                    return products.OrderByDescending(p => p.ProductName);                    
                 case CATEGORY_SORT:
-                    ProductList = ProductList.OrderBy(p => p.CategoryType).ToList();
-                    break;
+                    return products.OrderBy(p => p.ProductCategory.CategoryType);                   
                 case CATEGORY_SORT_DESC:
-                    ProductList = ProductList.OrderByDescending(p => p.CategoryType).ToList();
-                    break;
+                    return products.OrderByDescending(p => p.ProductCategory.CategoryType);                    
                 default:  // Name ascending 
-                    ProductList = ProductList.OrderBy(p => p.ProductId).ToList();
-                    break;
+                    return products.OrderBy(p => p.ProductId);                    
             }
+        }
+
+        private int CalculatePageCount(IQueryable<Product> products)
+        {
+            return (int)Math.Ceiling((double)products.Count() / PageSize);
+        }
+
+        private IQueryable<Product> GetPageItems(IQueryable<Product> products)
+        {            
+            return products.Skip(PageSize * (PageNumber - 1))
+                    .Take(PageSize);
         }
 
         private ProductModel Map(Product entity)

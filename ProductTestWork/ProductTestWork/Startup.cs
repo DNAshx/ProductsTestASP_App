@@ -36,6 +36,7 @@ namespace ProductTestWork
 
             services.Add(new ServiceDescriptor(typeof(IProductRepository), typeof(ProductRepository), ServiceLifetime.Scoped));
             services.Add(new ServiceDescriptor(typeof(IAllProductsViewModel), typeof(AllProductsViewModel), ServiceLifetime.Transient));
+            services.Add(new ServiceDescriptor(typeof(IProductViewModel), typeof(ProductViewModel), ServiceLifetime.Transient));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
